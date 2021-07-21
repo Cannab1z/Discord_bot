@@ -3,6 +3,7 @@ const client = new Discord.Client();
 client.commands = new Discord.Collection();
 const config = require('./config.json');
 const prefix = config.prefix;
+const ytdl = require('ytdl-core-discord');
 const fs = require('fs');
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'));
@@ -75,6 +76,41 @@ client.on('voiceStateUpdate', (oldMember, newMember) =>{
     afk_users.push({member: newMember.member, time: new Date(), channel: newMember});
   }
 });
+
+client.on('message', async message => {
+	if(message.content === '$play' || message.content === '$stop')
+  {
+    if (message.member.voice.channel) {
+      const connection = await message.member.voice.channel.join();
+      // Create a dispatcher
+      const dispatcher = connection.play(await ytdl('https://www.youtube.com/watch?v=xmeCr9QPhkA'), {type: 'opus'});
+      if(message.content == '$stop')
+        {
+          dispatcher.destroy();
+        }
+        dispatcher.on('start', () => {
+          console.log('audio.mp3 is now playing!');
+        });
+
+        dispatcher.on('finish', () => {
+          console.log('audio.mp3 has finished playing!');
+        });
+
+        // Always remember to handle errors appropriately!
+        dispatcher.on('error', console.error);
+        
+    }
+  }
+  
+});
+
+client.on('message', async message => {
+  if(message.content == '$quit')
+  {
+    message.guild.me.voice.channel.leave();
+  }
+});
+
 
 
 /*client.on('message', (message) => {
