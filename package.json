@@ -15,7 +15,9 @@
   },
   "homepage": "https://github.com/Cannab1z/Discord_bot#readme",
   "dependencies": {
+    "@discordjs/opus": "^0.5.3",
     "discord.js": "^12.5.3",
+    "ffmpeg": "0.0.4",
     "nodemon": "^2.0.12"
   }
 }

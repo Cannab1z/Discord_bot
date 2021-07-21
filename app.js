@@ -1,6 +1,41 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
+client.commands = new Discord.Collection();
 const config = require('./config.json');
+const prefix = config.prefix;
+const fs = require('fs');
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'));
+
+for (const file of commandFiles) {
+	const command = require(`./commands/${file}`);
+	client.commands.set(command.name, command);
+}
+
+for (const file of eventFiles) {
+	const event = require(`./events/${file}`);
+	if (event.once) {
+		client.once(event.name, (...args) => event.execute(...args, client));
+	} else {
+		client.on(event.name, (...args) => event.execute(...args, client));
+	}
+}
+
+client.on('message', message => {
+	if (!message.content.startsWith(prefix) || message.author.bot) return;
+
+	const args = message.content.slice(prefix.length).trim().split(/ +/);
+	const command = args.shift().toLowerCase();
+
+	if (!client.commands.has(command)) return;
+
+	try {
+		client.commands.get(command).execute(message, args);
+	} catch (error) {
+		console.error(error);
+		message.reply('there was an error trying to execute that command!');
+	}
+});
 
 const afk_users = [];
 
@@ -25,39 +60,19 @@ client.setInterval(() => {
       }
     }
   })
+  /*let number = Math.floor(Math.random() * 100);
+  if(number < 1)
+  {
+    let channels = client.guilds.cache.find(guild => guild.id == '803651327682543626').channels.cache.filter(channel => channel.type == "text");
+    channels.find(channel => channel.id == '803652300408488017').send("/play פסקול חיי");
+  }*/
 }, 10000);
-
-client.on('ready', () => {
-    console.log(`Logged in as ${client.user.tag}!`);
-
-  });
 
 client.on('voiceStateUpdate', (oldMember, newMember) =>{
   if(newMember.channelID == oldMember.guild.afkChannelID)
   {
     console.log(`${newMember.member.nickname} moved to afk`);
     afk_users.push({member: newMember.member, time: new Date(), channel: newMember});
-  }
-  else if(newMember.channelID != oldMember.channelID)
-  {
-    let special_role_users = newMember.member.guild.roles.cache.find(role => role.name === 'Gever').members.map(m=>m.user.tag);
-    special_role_users.forEach((user) => {
-      if(user === newMember.member.user.tag)
-      {
-        let number = Math.floor(Math.random() * 100);
-        console.log(number);
-        if(number < 5)
-        {
-          console.log(`kicked ${newMember.member.nickname}`)
-          newMember.member.voice.kick();
-          if(newMember.member.id === '253928420227022848')
-          {
-            let channel = newMember.member.guild.channels.cache.filter(channel => channel.type == "text");
-            channel.first().send(`${newMember.member.guild.members.cache.find(member => member.id == '197459744208715776').nickname} kicked ${newMember.member.nickname}`);
-          }
-        }
-      }
-    });
   }
 });
 
