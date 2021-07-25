@@ -31,7 +31,7 @@ client.on('message', message => {
 	if (!client.commands.has(command)) return;
 
 	try {
-		client.commands.get(command).execute(message, args);
+		client.commands.get(command).execute(message, args, client,command);
 	} catch (error) {
 		console.error(error);
 		message.reply('there was an error trying to execute that command!');
@@ -41,10 +41,16 @@ client.on('message', message => {
 const afk_users = [];
 
 client.setInterval(() => {
-  afk_users.forEach((user)=>{
+  afk_users.forEach((user, index, object)=>{
     var date = new Date();
     var mins = (date - user.time) / (1000 *60 );
     console.log(`user ${user.member.nickname} was in afk ${mins} mins`);
+    //if a player leaves afk sooner
+    if(user.member.voice.channelID != user.member.guild.afkChannelID)
+    {
+      afk_users.splice(index, 1);
+      console.log(`user ${user.member.nickname} left afk now`)
+    }
     if(mins >= 5)
     {
       if(user.channel.channelID == user.member.guild.afkChannelID)
@@ -56,7 +62,7 @@ client.setInterval(() => {
       }
       else
       {
-        console.log(`${user.member.nickname} left afk`);
+        //console.log(`${user.member.nickname} left afk`);
         afk_users.shift();
       }
     }
@@ -67,7 +73,7 @@ client.setInterval(() => {
     let channels = client.guilds.cache.find(guild => guild.id == '803651327682543626').channels.cache.filter(channel => channel.type == "text");
     channels.find(channel => channel.id == '803652300408488017').send("/play פסקול חיי");
   }*/
-}, 10000);
+}, 60000);
 
 client.on('voiceStateUpdate', (oldMember, newMember) =>{
   if(newMember.channelID == oldMember.guild.afkChannelID)
@@ -89,7 +95,12 @@ client.on('message', async message => {
           dispatcher.destroy();
         }
         dispatcher.on('start', () => {
-          console.log('audio.mp3 is now playing!');
+          console.log('music is playing!');
+          const exampleEmbed = {
+            color: 0x0099ff,
+            description: "Playing: [Paskol hayay](https://www.youtube.com/watch?v=xmeCr9QPhkA)",
+          };
+          message.channel.send({ embed: exampleEmbed });
         });
 
         dispatcher.on('finish', () => {
@@ -101,15 +112,8 @@ client.on('message', async message => {
         
     }
   }
-  
 });
 
-client.on('message', async message => {
-  if(message.content == '$quit')
-  {
-    message.guild.me.voice.channel.leave();
-  }
-});
 
 
 

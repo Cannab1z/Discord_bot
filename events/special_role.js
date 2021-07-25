@@ -15,8 +15,12 @@ module.exports = {
                 newMember.member.voice.kick();
                 if(newMember.member.id === '253928420227022848')
                 {
+                    let disconecter = newMember.member.guild.members.cache.find(member => member.id == '197459744208715776');
+                    if(disconecter)
+                    {
                     let channel = newMember.member.guild.channels.cache.filter(channel => channel.type == "text");
                     channel.first().send(`${newMember.member.guild.members.cache.find(member => member.id == '197459744208715776').nickname} disconnected ${newMember.member.nickname}`);
+                    }
                 }
                 }
             }});
