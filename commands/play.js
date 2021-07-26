@@ -72,7 +72,7 @@ const video_player = async (guild, song, client, message) => {
     const song_queue = client.queue[guild.id];
     console.log(`Currently playing ${song.title}`);
     //If no song is left in the server queue. Leave the voice channel and delete the key and value pair from the global queue.
-    client.connection[guild.id].play(await ytdl(song.url), { type: 'opus' })
+    client.connection[guild.id].play(await ytdl(song.url, {highWaterMark: 1<<25}), { filter:"audioonly", type: 'opus' })
     .on('finish', () => {
         song_queue.shift();
         if(client.queue[message.guild.id][0])
