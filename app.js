@@ -1,3 +1,4 @@
+//modules requires
 const Discord = require('discord.js');
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
@@ -5,9 +6,12 @@ const config = require('./config.json');
 const prefix = config.prefix;
 const ytdl = require('ytdl-core-discord');
 const fs = require('fs');
+
+//adding files
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'));
 
+//requiring commands and events
 for (const file of commandFiles) {
 	const command = require(`./commands/${file}`);
 	client.commands.set(command.name, command);
@@ -22,6 +26,7 @@ for (const file of eventFiles) {
 	}
 }
 
+//activating commands to files accordingly
 client.on('message', message => {
 	if (!message.content.startsWith(prefix) || message.author.bot) return;
 
@@ -39,97 +44,63 @@ client.on('message', message => {
 	}
 });
 
+//afk related events
 const afk_users = [];
 
 client.setInterval(() => {
   afk_users.forEach((user, index, object)=>{
     var date = new Date();
     var mins = (date - user.time) / (1000 *60 );
-    console.log(`user ${user.member.nickname} was in afk ${mins} mins`);
-    //if a player leaves afk sooner
+    //if a member leaves afk sooner
     if(user.member.voice.channelID != user.member.guild.afkChannelID)
     {
       afk_users.splice(index, 1);
-      console.log(`user ${user.member.nickname} left afk now`)
+      console.log(`afk: user ${user.member.nickname} (${user.member.user.tag}) left afk now`)
     }
     if(mins >= 5)
     {
       if(user.channel.channelID == user.member.guild.afkChannelID)
       {
         user.member.voice.kick();
-        console.log(`kicked ${user.member.nickname}`);
+        console.log(`afk: disconnected ${user.member.nickname} (${user.member.user.tag}) - ${user.member.guild.name}`);
         afk_users.shift();
         return;
       }
       else
       {
-        //console.log(`${user.member.nickname} left afk`);
         afk_users.shift();
       }
     }
   })
-  /*let number = Math.floor(Math.random() * 100);
-  if(number < 1)
-  {
-    let channels = client.guilds.cache.find(guild => guild.id == '803651327682543626').channels.cache.filter(channel => channel.type == "text");
-    channels.find(channel => channel.id == '803652300408488017').send("/play פסקול חיי");
-  }*/
 }, 60000);
 
 client.on('voiceStateUpdate', (oldMember, newMember) =>{
   if(newMember.channelID == oldMember.guild.afkChannelID)
   {
-    console.log(`${newMember.member.nickname} moved to afk`);
+    console.log(`afk: ${newMember.member.nickname} (${newMember.member.user.tag}) moved to afk - [${newMember.member.guild.name}]`);
     afk_users.push({member: newMember.member, time: new Date(), channel: newMember});
   }
 });
-
-client.on('message', async message => {
-	if(message.content === '$play' || message.content === '$stop')
+client.on('message', message => {
+  if(message.content === '?fun')
   {
-    if (message.member.voice.channel) {
-      const connection = await message.member.voice.channel.join();
-      // Create a dispatcher
-      const dispatcher = connection.play(await ytdl('https://www.youtube.com/watch?v=xmeCr9QPhkA'), {type: 'opus'});
-      if(message.content == '$stop')
-        {
-          dispatcher.destroy();
-        }
-        dispatcher.on('start', () => {
-          console.log('music is playing!');
-          const exampleEmbed = {
-            color: 0x0099ff,
-            description: "Playing: [Paskol hayay](https://www.youtube.com/watch?v=xmeCr9QPhkA)",
-          };
-          message.channel.send({ embed: exampleEmbed });
-        });
-
-        dispatcher.on('finish', () => {
-          console.log('audio.mp3 has finished playing!');
-        });
-
-        // Always remember to handle errors appropriately!
-        dispatcher.on('error', console.error);
-        
+    const channels = message.guild.channels.cache.filter(c => c.type === 'voice');
+    const members = [];
+    for (const [channelID, channel] of channels) {
+      for (const [memberID, member] of channel.members) {
+       members.push(member);
+      }
     }
+    members.forEach((member) => {
+      let number = Math.floor(Math.random() * 100);
+      if(number < 5)
+      {
+        console.log(`?fun: ${member.nickname} Got Disconnected - [${message.guild.name}]`);
+        member.voice.kick();
+        return;
+      }
+    })
   }
 });
-
-
-
-
-/*client.on('message', (message) => {
-  //var guild = new Discord.Guild();
-  //guild = client.guilds.resolveID
-  console.log(message.guild.afkChannelID + " hey ");
-  //console.log(message.client.user);
-  console.log(message.guild.id)
-  //if(message.client)
-  //console.log(message.guild.afkChannel.members);
-  let members_arr = message.guild.afkChannel.members.array();
-  members_arr.forEach((member)=>{
-    console.log(member.nickname);
-  })
-});*/
-
+//login token
 client.login(config.token);

@@ -19,6 +19,15 @@ module.exports = {
             {
                 return message.channel.send('You have to specify a song to play');
             }
+            //Yaari thing
+            if(args.join(' ') == 'villager arik main theme')
+            {
+                console.log(args.join(' '))
+                args = [];
+                args[0] = "sigma";
+                args[1] = "male";
+                args[2] = "song";
+            }
             let song = {};
             if (ytdl.validateURL(args[0])) 
             {
@@ -70,9 +79,9 @@ module.exports = {
 };
 const video_player = async (guild, song, client, message) => {
     const song_queue = client.queue[guild.id];
-    console.log(`Currently playing ${song.title}`);
+    console.log(`Music: Currently playing ${song.title} - [${guild.name}]`);
     //If no song is left in the server queue. Leave the voice channel and delete the key and value pair from the global queue.
-    client.connection[guild.id].play(await ytdl(song.url, {highWaterMark: 1<<25}), { filter:"audioonly", type: 'opus' })
+    client.connection[guild.id].dispatcher = client.connection[guild.id].play(await ytdl(song.url, {highWaterMark: 1<<25}), { filter:"audioonly", type: 'opus' })
     .on('finish', () => {
         song_queue.shift();
         if(client.queue[message.guild.id][0])
@@ -80,6 +89,7 @@ const video_player = async (guild, song, client, message) => {
             video_player(guild, client.queue[message.guild.id][0],client, message);
         } else {
             client.connection[guild.id].disconnect();
+            console.log(`Music: disconnected from voice channel - [${guild.name}]`);
         }
         
     });
@@ -92,6 +102,7 @@ const video_player = async (guild, song, client, message) => {
 
 const skip_song = async (message, client) => {
     if (!message.member.voice.channel) return message.channel.send('You need to be in a channel to execute this command!');
+    console.log(`Music: skipped song ${client.queue[message.guild.id][0]} - [${message.member.guild.name}]`);
     if(!client.queue[message.guild.id]){
         return message.channel.send(`There are no songs in queue`);
     }
@@ -106,23 +117,40 @@ const skip_song = async (message, client) => {
         };
         await message.channel.send({ embed: NoSongsMessage });
         client.connection[message.guild.id].disconnect();
+        console.log(`Music: disconnected from voice channel - [${message.member.guild.name}]`);
     }
     
 }
 
 const stop_song = (message, client) => {
     if (!message.member.voice.channel) return message.channel.send('You need to be in a channel to execute this command!');
-    client.connection[message.guild.id] = null;
+    client.connection[message.guild.id].dispatcher.pause();
+    console.log(`Music: stopped song: ${client.queue[message.guild.id][0]} - [${message.member.guild.name}]`);
     //message.guild.me.voice.channel.leave();
 }
 
 const quit_channel = (message, client) => {
     const inSameChannel = client.voice.connections.some((connection) => connection.channel.id === message.member.voice.channelID);
-    console.log("quit");
+    console.log(`Music: disconnected from voice channel - [${message.member.guild.name}]`);
 	if (inSameChannel)
 	{
 		message.guild.me.voice.channel.leave();
 		client.queue[message.guild.id] = [];
         client.connection[message.guild.id] = null;
 	}
+}
+const loop_queue = (message, client) => {
+    if(client.loopState[message.member.guild.id] === 'false')
+    {
+        client.loopState[message.member.guild.id] = 'queue';
+    }
+    else if(client.loopState[message.member.guild.id] === 'queue')
+    {
+        client.loopState[message.member.guild.id] = 'song';
+    }
+    else if(client.loopState[message.member.guild.id] === 'song')
+    {
+        client.loopState[message.member.guild.id] = 'false';
+    }
+    console.log(client.loopState[message.member.guild.id]);
 }
