@@ -102,7 +102,7 @@ const video_player = async (guild, song, client, message) => {
 
 const skip_song = async (message, client) => {
     if (!message.member.voice.channel) return message.channel.send('You need to be in a channel to execute this command!');
-    console.log(`Music: skipped song ${client.queue[message.guild.id][0]} - [${message.member.guild.name}]`);
+    console.log(`Music: skipped song ${client.queue[message.guild.id][0].title} - [${message.member.guild.name}]`);
     if(!client.queue[message.guild.id]){
         return message.channel.send(`There are no songs in queue`);
     }
