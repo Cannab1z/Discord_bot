@@ -6,7 +6,7 @@ module.exports = {
             console.log("yaari")
             if(oldMember.id === '197459744208715776')
             {
-                newMember.setNickname("itzko");
+                newMember.setNickname("איצקו");
             }
         }
 	},
