@@ -13,5 +13,6 @@ module.exports = {
 			client.loop[guild.id] = [];
 			client.loopState[guild.id] = 'false';
 		});
+		
 	},
 };
