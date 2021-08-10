@@ -80,6 +80,14 @@ client.on('voiceStateUpdate', (oldMember, newMember) =>{
     console.log(`afk: ${newMember.member.nickname} (${newMember.member.user.tag}) moved to afk - [${newMember.member.guild.name}]`);
     afk_users.push({member: newMember.member, time: new Date(), channel: newMember});
   }
+  if(oldMember.id === client.user.id)
+  {
+    if(newMember.channelID === null)
+    {
+      client.queue[OldMember.member.guild.id] = [];
+      client.connection[guild.id] = null;
+    }
+  }
 });
 client.on('message', message => {
   if(message.content === '?fun')

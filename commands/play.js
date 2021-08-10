@@ -89,6 +89,8 @@ const video_player = async (guild, song, client, message) => {
             video_player(guild, client.queue[message.guild.id][0],client, message);
         } else {
             client.connection[guild.id].disconnect();
+            client.queue[message.guild.id] = [];
+            
             console.log(`Music: disconnected from voice channel - [${guild.name}]`);
         }
         
