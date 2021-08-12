@@ -85,7 +85,7 @@ client.on('voiceStateUpdate', (oldMember, newMember) =>{
     if(newMember.channelID === null)
     {
       client.queue[oldMember.member.guild.id] = [];
-      client.connection[guild.id] = null;
+      client.connection[oldMember.member.guild.id] = null;
     }
   }
 });

@@ -14,7 +14,7 @@ module.exports = {
                     fields: [
                         {
                             name: 'Music',
-                            value: '**play**\n **skip**\n **stop**\n **quit**\n',
+                            value: 'play\n skip\n stop\n quit\n',
                         },
                     ],
                 };
