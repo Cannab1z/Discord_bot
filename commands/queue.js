@@ -1,6 +1,6 @@
 module.exports = {
 	name: 'queue',
-	description: 'hey',
+	description: 'queue',
 	execute(message, args,client) {
         const queue = client.queue[message.guild.id];
         let queueString = "";

@@ -14,11 +14,15 @@ module.exports = {
                     fields: [
                         {
                             name: 'Music',
-                            value: 'play\n skip\n stop\n quit\n',
+                            value: 'play\n skip\n stop\n quit\n loop\n queue\n',
                         },
                         {
                             name: 'Moderation',
                             value: 'disablefun\n enablefun',
+                        },
+                        {
+                            name: 'Other',
+                            value: 'clean\n ?fun\n hey\n',
                         },
                     ],
                 };
