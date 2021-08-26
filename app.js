@@ -92,22 +92,29 @@ client.on('voiceStateUpdate', (oldMember, newMember) =>{
 client.on('message', message => {
   if(message.content === '?fun')
   {
-    const channels = message.guild.channels.cache.filter(c => c.type === 'voice');
-    const members = [];
-    for (const [channelID, channel] of channels) {
-      for (const [memberID, member] of channel.members) {
-       members.push(member);
+    console.log(client.fun[message.guild.id]);
+    if(client.fun[message.guild.id] === 'true')
+    {
+      const channels = message.guild.channels.cache.filter(c => c.type === 'voice');
+      const members = [];
+      for (const [channelID, channel] of channels) {
+        for (const [memberID, member] of channel.members) {
+        members.push(member);
+        }
       }
+      members.forEach((member) => {
+        let number = Math.floor(Math.random() * 100);
+        if(number < 5)
+        {
+          console.log(`?fun: ${member.nickname} Got Disconnected - [${message.guild.name}]`);
+          member.voice.kick();
+          return;
+        }
+      })
+    } else
+    {
+      return;
     }
-    members.forEach((member) => {
-      let number = Math.floor(Math.random() * 100);
-      if(number < 5)
-      {
-        console.log(`?fun: ${member.nickname} Got Disconnected - [${message.guild.name}]`);
-        member.voice.kick();
-        return;
-      }
-    })
   }
 });
 //login token

@@ -16,6 +16,10 @@ module.exports = {
                             name: 'Music',
                             value: 'play\n skip\n stop\n quit\n',
                         },
+                        {
+                            name: 'Moderation',
+                            value: 'disablefun\n enablefun',
+                        },
                     ],
                 };
                 message.channel.send({ embed: exampleEmbed });
