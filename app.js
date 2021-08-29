@@ -77,6 +77,7 @@ client.setInterval(() => {
 client.on('voiceStateUpdate', (oldMember, newMember) =>{
   if(newMember.channelID == oldMember.guild.afkChannelID)
   {
+    oldMember.member.voice.channel.joi
     console.log(`afk: ${newMember.member.nickname} (${newMember.member.user.tag}) moved to afk - [${newMember.member.guild.name}]`);
     afk_users.push({member: newMember.member, time: new Date(), channel: newMember});
   }
