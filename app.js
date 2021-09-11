@@ -6,6 +6,7 @@ const config = require('./config.json');
 const prefix = config.prefix;
 const ytdl = require('ytdl-core-discord');
 const fs = require('fs');
+const { listenerCount } = require('events');
 
 //adding files
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
@@ -77,7 +78,6 @@ client.setInterval(() => {
 client.on('voiceStateUpdate', (oldMember, newMember) =>{
   if(newMember.channelID == oldMember.guild.afkChannelID)
   {
-    oldMember.member.voice.channel.joi
     console.log(`afk: ${newMember.member.nickname} (${newMember.member.user.tag}) moved to afk - [${newMember.member.guild.name}]`);
     afk_users.push({member: newMember.member, time: new Date(), channel: newMember});
   }

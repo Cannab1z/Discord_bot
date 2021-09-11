@@ -10,11 +10,10 @@ module.exports = {
                 message.channel.send(exampleEmbed);*/
                 const exampleEmbed = {
                     color: 0x0099ff,
-                    description: 'Ima shel minran',
                     fields: [
                         {
                             name: 'Music',
-                            value: 'play\n skip\n stop\n quit\n loop\n queue\n',
+                            value: 'play\n skip\n stop\n quit\n loop\n queue\n seek\n lyrics(type song)\n',
                         },
                         {
                             name: 'Moderation',

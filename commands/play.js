@@ -97,7 +97,7 @@ const video_player = async (guild, song, client, message) => {
             {
                 video_player(guild, client.queue[message.guild.id][0],client, message);
             } else {
-                client.connection[message.guild.id].disconnect();
+                //client.connection[message.guild.id].disconnect();
                 client.queue[message.guild.id] = [];
                 client.connection[message.guild.id] = null;
                 client.loopState[message.member.guild.id] = 'false';
@@ -151,21 +151,25 @@ const video_finder = async (client, message, query) =>{
 
 const skip_song = async (message, client) => {
     if (!message.member.voice.channel) return message.channel.send('You need to be in a channel to execute this command!');
-    console.log(`Music: skipped song ${client.queue[message.guild.id][0].title} - [${message.member.guild.name}]`);
-    if(!client.queue[message.guild.id]){
-        return message.channel.send(`There are no songs in queue`);
+    const NoSongsMessage = {
+        color: 0x0099ff,
+        description: `There are no songs in the queue`,
+    };
+    if(client.queue[message.guild.id].length === 0){
+        return await message.channel.send({ embed: NoSongsMessage });
     }
     client.queue[message.guild.id].shift();
     if(client.queue[message.guild.id][0])
     {
+        console.log(`Music: skipped song ${client.queue[message.guild.id][0].title} - [${message.member.guild.name}]`);
         video_player(message.guild,client.queue[message.guild.id][0],client,message);
     } else {
         const NoSongsMessage = {
             color: 0x0099ff,
-            description: `There are no songs in the queue, disconnecting...`,
+            description: `There are no songs in the queue`,
         };
         await message.channel.send({ embed: NoSongsMessage });
-        client.connection[message.guild.id].disconnect();
+        client.connection[message.guild.id].dispatcher.pause();
 		client.queue[message.guild.id] = [];
         client.connection[message.guild.id] = null;
         client.loopState[message.member.guild.id] = 'false';
