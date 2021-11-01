@@ -97,7 +97,7 @@ const video_player = async (guild, song, client, message) => {
             {
                 video_player(guild, client.queue[message.guild.id][0],client, message);
             } else {
-                //client.connection[message.guild.id].disconnect();
+                client.connection[message.guild.id].disconnect();
                 client.queue[message.guild.id] = [];
                 client.connection[message.guild.id] = null;
                 client.loopState[message.member.guild.id] = 'false';
@@ -166,10 +166,10 @@ const skip_song = async (message, client) => {
     } else {
         const NoSongsMessage = {
             color: 0x0099ff,
-            description: `There are no songs in the queue`,
+            description: `There are no songs in the queue, disconnecting...`,
         };
         await message.channel.send({ embed: NoSongsMessage });
-        client.connection[message.guild.id].dispatcher.pause();
+        client.connection[message.guild.id].disconnect();
 		client.queue[message.guild.id] = [];
         client.connection[message.guild.id] = null;
         client.loopState[message.member.guild.id] = 'false';
