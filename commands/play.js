@@ -20,52 +20,56 @@ module.exports = {
         }
         if(command == 'play')
         {
-            if(!args.length)
-            {
-                return message.channel.send('You have to specify a song to play');
-            }
-            let isPlaylist = false;
-            let name = args.join(' ');
-            if(args[0].substring(0,24) === "https://open.spotify.com")
-            {
-                const data = await getPreview(args[0]);
-                if(data)
+            try {
+                if(!args.length)
                 {
-                    if(data.type === "track")
+                    return message.channel.send('You have to specify a song to play');
+                }
+                let isPlaylist = false;
+                let name = args.join(' ');
+                if(args[0].substring(0,24) === "https://open.spotify.com")
+                {
+                    const data = await getPreview(args[0]);
+                    if(data)
                     {
-                        name = `${data.track} ${data.artist}`;
-                    } else if (data.type === "playlist")
-                    {
-                        isPlaylist = true;
-                        const dataPlaylist = await getTracks(args[0])
-                        if(dataPlaylist)
+                        if(data.type === "track")
                         {
-                            let i = 0;
-                            for(const track of dataPlaylist) {
-                                let query = `${track.name} ${track.artists[0].name}`;
-                                song = await video_finder(client, message, query);
-                                await add_to_queue(client, message, song, true);
-                                i++;
+                            name = `${data.track} ${data.artist}`;
+                        } else if (data.type === "playlist" || data.type === "album")
+                        {
+                            isPlaylist = true;
+                            const dataPlaylist = await getTracks(args[0])
+                            if(dataPlaylist)
+                            {
+                                let i = 0;
+                                for(const track of dataPlaylist) {
+                                    let query = `${track.name} ${track.artists[0].name}`;
+                                    song = await video_finder(client, message, query);
+                                    await add_to_queue(client, message, song, true);
+                                    i++;
+                                }
+                                const QueueMessage = {
+                                    color: 0x0099ff,
+                                    description: `${i} songs were added to the queue!`,
+                                };
+                                return message.channel.send({ embed: QueueMessage });
                             }
-                            const QueueMessage = {
-                                color: 0x0099ff,
-                                description: `${i} songs were added to the queue!`,
-                            };
-                            return message.channel.send({ embed: QueueMessage });
                         }
                     }
                 }
-            }
-            if (ytdl.validateURL(args[0]))
-            {
-                const song_info = await ytdl.getInfo(args[0]);
-                song = { title: song_info.videoDetails.title, url: song_info.videoDetails.video_url }
-                client.queue[message.guild.id].push(song);
-                await add_to_queue(client, message, song);
-            } else {
-                //If there was no link, we use keywords to search for a video. Set the song object to have two keys. Title and URl.
-                song = await video_finder(client, message, name);
-                await add_to_queue(client, message, song);
+                if (ytdl.validateURL(args[0]))
+                {
+                    const song_info = await ytdl.getInfo(args[0]);
+                    song = { title: song_info.videoDetails.title, url: song_info.videoDetails.video_url }
+                    client.queue[message.guild.id].push(song);
+                    await add_to_queue(client, message, song);
+                } else {
+                    //If there was no link, we use keywords to search for a video. Set the song object to have two keys. Title and URl.
+                    song = await video_finder(client, message, name);
+                    await add_to_queue(client, message, song);
+                }
+            } catch(err) {
+                console.log(new Date() + err);
             }
         }
         else if(command === 'skip') skip_song(message, client);
