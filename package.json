@@ -20,6 +20,7 @@
     "ffmpeg": "0.0.4",
     "ffmpeg-static": "^4.4.0",
     "genius-lyrics": "^4.2.9",
+    "isomorphic-unfetch": "^3.1.0",
     "nodemon": "^2.0.12",
     "opusscript": "^0.0.8",
     "spotify-url-info": "^2.2.3",

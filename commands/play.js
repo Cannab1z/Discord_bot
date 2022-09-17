@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const ytdl = require('ytdl-core-discord');
+const fetch = require('isomorphic-unfetch')
 const ytdlc = require('ytdl-core');
 const YouTube = require("youtube-sr").default;
 const { getData, getPreview, getTracks } = require('spotify-url-info')(fetch);
