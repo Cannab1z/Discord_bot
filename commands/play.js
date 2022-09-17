@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const ytdl = require('ytdl-core-discord');
 const ytdlc = require('ytdl-core');
 const YouTube = require("youtube-sr").default;
-const { getData, getPreview, getTracks } = require('spotify-url-info');
+const { getData, getPreview, getTracks } = require('spotify-url-info')(fetch);
 const Genius = require("genius-lyrics");
 const Client = new Genius.Client("nLNQUDVmfR055RfrdHOfYolv7dTqcG-ruxC1FDge4FWV1FdnppWIW9f2xu9tPAEb");
 
