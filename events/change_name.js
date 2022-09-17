@@ -5,7 +5,7 @@ module.exports = {
         {
             if(oldMember.id === '197459744208715776')
             {
-                newMember.setNickname("איצקו");
+                //newMember.setNickname("איצקו");
             }
         }
 	},
