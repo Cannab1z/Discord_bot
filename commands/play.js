@@ -1,8 +1,8 @@
 const Discord = require('discord.js');
 const ytdl = require('ytdl-core-discord');
-const ytdlc = require('ytdl-core');
 const YouTube = require("youtube-sr").default;
-const { getData, getPreview, getTracks } = require('spotify-url-info');
+const { getData, getPreview, getTracks, getDetails } = require('spotify-url-info')
+const spotifyToYT = require("spotify-to-yt")
 const Genius = require("genius-lyrics");
 const Client = new Genius.Client("nLNQUDVmfR055RfrdHOfYolv7dTqcG-ruxC1FDge4FWV1FdnppWIW9f2xu9tPAEb");
 
@@ -27,33 +27,32 @@ module.exports = {
                 }
                 let isPlaylist = false;
                 let name = args.join(' ');
+                console.log(`name: ${name}`)
                 if(args[0].substring(0,24) === "https://open.spotify.com")
                 {
-                    const data = await getPreview(args[0]);
-                    if(data)
+                    if(data.type === "track")
                     {
-                        if(data.type === "track")
+                        name = `${data.track} ${data.artist}`;
+                    } else if (data.type === "playlist" || data.type === "album")
+                    {
+                        console.log("hey")
+                        isPlaylist = true;
+                        const dataPlaylist = await getTracks(args[0])
+                        console.log(dataPlaylist)
+                        if(dataPlaylist)
                         {
-                            name = `${data.track} ${data.artist}`;
-                        } else if (data.type === "playlist" || data.type === "album")
-                        {
-                            isPlaylist = true;
-                            const dataPlaylist = await getTracks(args[0])
-                            if(dataPlaylist)
-                            {
-                                let i = 0;
-                                for(const track of dataPlaylist) {
-                                    let query = `${track.name} ${track.artists[0].name}`;
-                                    song = await video_finder(client, message, query);
-                                    await add_to_queue(client, message, song, true);
-                                    i++;
-                                }
-                                const QueueMessage = {
-                                    color: 0x0099ff,
-                                    description: `${i} songs were added to the queue!`,
-                                };
-                                return message.channel.send({ embed: QueueMessage });
+                            let i = 0;
+                            for(const track of dataPlaylist) {
+                                let query = `${track.name} ${track.artists[0].name}`;
+                                song = await video_finder(client, message, query);
+                                await add_to_queue(client, message, song, true);
+                                i++;
                             }
+                            const QueueMessage = {
+                                color: 0x0099ff,
+                                description: `${i} songs were added to the queue!`,
+                            };
+                            return message.channel.send({ embed: QueueMessage });
                         }
                     }
                 }
@@ -77,7 +76,6 @@ module.exports = {
         else if(command === 'quit') quit_channel(message, client);
         else if(command === 'loop') loop_queue(message, client);
         else if(command === 'lyrics') lyrics_song(message, client, args);
-        else if(command === 'seek') seek_song(message, client, args);
     },
 };
 const video_player = async (guild, song, client, message) => {
@@ -268,38 +266,4 @@ const lyrics_song = async (message, client, args) => {
     {
         await message.channel.send({embed: LyricsMessage});
     }*/
-}
-const seek_song = async (message, client, args) => {
-    let guild = message.guild;
-    let song = client.queue[message.guild.id][0];
-    const song_queue = client.queue[guild.id];
-    let stream = await ytdlc(song.url,{filter: 'audioonly', highWaterMark: 1<<25});
-    const streamOptions = {
-        seek: args[0],
-        highWaterMark: 1<<25
-    };
-    client.connection[guild.id].dispatcher = client.connection[message.guild.id].play(stream, streamOptions, {type: 'opus'}).on("finish", () => {
-        if(client.loopState[guild.id] === 'song')
-        {
-            video_player(guild, song,client, message);
-        } else if (client.loopState[guild.id] === 'queue')
-        {
-            song_queue.push(song_queue.shift());
-            video_player(guild, client.queue[message.guild.id][0],client, message);
-        }
-        else
-        {
-            song_queue.shift();
-            if(client.queue[message.guild.id][0])
-            {
-                video_player(guild, client.queue[message.guild.id][0],client, message);
-            } else {
-                client.connection[message.guild.id].disconnect();
-                client.queue[message.guild.id] = [];
-                client.connection[message.guild.id] = null;
-                client.loopState[message.member.guild.id] = 'false';
-                console.log(`Music: disconnected from voice channel - [${guild.name}]`);
-            }
-        }
-    });
 }

@@ -13,7 +13,7 @@ module.exports = {
                     fields: [
                         {
                             name: 'Music',
-                            value: 'play\n skip\n stop\n quit\n loop\n queue\n seek\n lyrics(type song)\n',
+                            value: 'play\n skip\n stop\n quit\n loop\n queue\n lyrics(type song)\n',
                         },
                         {
                             name: 'Moderation',

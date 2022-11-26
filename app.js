@@ -3,7 +3,7 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
 const config = require('./config.json');
-const prefix = config.prefix;
+const prefix = process.env.prefix;
 const ytdl = require('ytdl-core-discord');
 const fs = require('fs');
 const { listenerCount } = require('events');
@@ -30,7 +30,6 @@ for (const file of eventFiles) {
 //activating commands to files accordingly
 client.on('message', message => {
 	if (!message.content.startsWith(prefix) || message.author.bot) return;
-
 	const args = message.content.slice(prefix.length).trim().split(/ +/);
 	const commandName = args.shift().toLowerCase();
 	const command = client.commands.get(commandName)
@@ -119,4 +118,4 @@ client.on('message', message => {
   }
 });
 //login token
-client.login(config.token);
+client.login(process.env.token);
