@@ -2,7 +2,6 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
-const config = require('./config.json');
 const prefix = process.env.prefix;
 const ytdl = require('ytdl-core-discord');
 const fs = require('fs');
