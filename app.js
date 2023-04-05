@@ -1,20 +1,34 @@
 //modules requires
-const Discord = require('discord.js');
-const client = new Discord.Client();
-client.commands = new Discord.Collection();
+const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
+const client = new Client({
+	intents: [
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.MessageContent,
+		GatewayIntentBits.GuildMembers,
+	],
+});
+client.commands = new Collection();
 const prefix = process.env.prefix;
 const ytdl = require('ytdl-core-discord');
-const fs = require('fs');
+const fs = require('node:fs');
+const path = require('node:path');
 const { listenerCount } = require('events');
 
 //adding files
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+const commandsPath = path.join(__dirname, 'commands');
+const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'));
 
 //requiring commands and events
 for (const file of commandFiles) {
-	const command = require(`./commands/${file}`);
-	client.commands.set(command.name, command);
+	const filePath = path.join(commandsPath, file)
+	const command = require(filePath);
+	if ('data' in command && 'execute' in command) {
+		client.commands.set(command.data.name, command);
+	} else {
+		console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+	}
 }
 
 for (const file of eventFiles) {
@@ -27,26 +41,36 @@ for (const file of eventFiles) {
 }
 
 //activating commands to files accordingly
-client.on('message', message => {
-	if (!message.content.startsWith(prefix) || message.author.bot) return;
+client.on(Events.InteractionCreate, async interaction => {
+	if (!interaction.isChatInputCommand()) return;
+	console.log(interaction);
 	const args = message.content.slice(prefix.length).trim().split(/ +/);
-	const commandName = args.shift().toLowerCase();
-	const command = client.commands.get(commandName)
-		|| client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
-	if (!command) return;
+	const command = interaction.client.commands.get(interaction.commandName);
+	console.log(client.commands);
+	console.log("----------------------");
+	console.log(client.commands.get("play"))
+	console.log(message)
+        if (!command) {
+		console.error(`No command matching ${interaction.commandName} was found.`);
+		return;
+	}
 
 	try {
-		command.execute(message, args,client,commandName);
+		await command.execute(interaction);
 	} catch (error) {
 		console.error(error);
-		message.reply('there was an error trying to execute that command!');
+		if (interaction.replied || interaction.deferred) {
+			await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+		} else {
+			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+		}
 	}
 });
 
 //afk related events
 const afk_users = [];
 
-client.setInterval(() => {
+/*client.setInterval(() => {
   afk_users.forEach((user, index, object)=>{
     var date = new Date();
     var mins = (date - user.time) / (1000 *60 );
@@ -71,7 +95,7 @@ client.setInterval(() => {
       }
     }
   })
-}, 60000);
+}, 60000);*/
 
 client.on('voiceStateUpdate', (oldMember, newMember) =>{
   if(newMember.channelID == oldMember.guild.afkChannelID)
@@ -88,7 +112,7 @@ client.on('voiceStateUpdate', (oldMember, newMember) =>{
     }
   }
 });
-client.on('message', message => {
+client.on('messageCreate', message => {
   if(message.content === '?fun')
   {
     console.log(client.fun[message.guild.id]);
@@ -116,5 +140,9 @@ client.on('message', message => {
     }
   }
 });
+
+//debug
+
+client.on('debug', console.log);
 //login token
 client.login(process.env.token);

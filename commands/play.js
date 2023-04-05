@@ -5,25 +5,23 @@ const { getData, getPreview, getTracks, getDetails } = require('spotify-url-info
 const spotifyToYT = require("spotify-to-yt")
 const Genius = require("genius-lyrics");
 const Client = new Genius.Client("nLNQUDVmfR055RfrdHOfYolv7dTqcG-ruxC1FDge4FWV1FdnppWIW9f2xu9tPAEb");
-
+const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
-	name: 'play',
-	description: 'music',
-    aliases: ['stop', 'skip', 'quit', 'loop', 'lyrics', 'seek'],
-    guildOnly: true,
-    
-	execute: async (message, args,client,command) => {
+    data: new SlashCommandBuilder()
+	.setName('play')
+	.setDescription('music'),
+    async execute(message, args,client,command){
         if (!message.member.voice.channel)
         {
-            return message.channel.send('You need to be in a channel to execute this command!');
+            await interaction.reply('You need to be in a channel to execute this command!');
         }
         if(command == 'play')
         {
             try {
                 if(!args.length)
                 {
-                    return message.channel.send('You have to specify a song to play');
+                    await interaction.reply('You have to specify a song to play');
                 }
                 let isPlaylist = false;
                 let name = args.join(' ');
@@ -52,7 +50,7 @@ module.exports = {
                                 color: 0x0099ff,
                                 description: `${i} songs were added to the queue!`,
                             };
-                            return message.channel.send({ embed: QueueMessage });
+                            await interaction.reply({ embed: QueueMessage });
                         }
                     }
                 }
@@ -124,7 +122,7 @@ const add_to_queue = async (client, message, song, isPlaylist=false) => {
             await video_player(message.guild, client.queue[message.guild.id][0], client, message);
         } catch (err) {
             client.queue[message.guild.id] = [];
-            message.channel.send('There was an error connecting!');
+            await interaction.reply('There was an error connecting!');
             throw err;
         }
     }
